@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ping Pong Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: #111;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="game" width="600" height="400"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// Paddle
+const paddleWidth = 10, paddleHeight = 80;
+
+// Player
+const player = {
+  x: 0,
+  y: canvas.height / 2 - paddleHeight / 2,
+  dy: 0
+};
+
+// Computer
+const computer = {
+  x: canvas.width - paddleWidth,
+  y: canvas.height / 2 - paddleHeight / 2
+};
+
+// Ball
+const ball = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  radius: 7,
+  dx: 4,
+  dy: 4
+};
+
+// Draw rectangle
+function drawRect(x, y, w, h) {
+  ctx.fillStyle = "white";
+  ctx.fillRect(x, y, w, h);
+}
+
+// Draw circle
+function drawBall(x, y, r) {
+  ctx.fillStyle = "white";
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// Game loop
+function update() {
+  ball.x += ball.dx;
+  ball.y += ball.dy;
+
+  // Bounce top/bottom
+  if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+    ball.dy *= -1;
+  }
+
+  // Computer AI
+  computer.y += (ball.y - (computer.y + paddleHeight / 2)) * 0.05;
+
+  // Collision with player
+  if (
+    ball.x - ball.radius < player.x + paddleWidth &&
+    ball.y > player.y &&
+    ball.y < player.y + paddleHeight
+  ) {
+    ball.dx *= -1;
+  }
+
+  // Collision with computer
+  if (
+    ball.x + ball.radius > computer.x &&
+    ball.y > computer.y &&
+    ball.y < computer.y + paddleHeight
+  ) {
+    ball.dx *= -1;
+  }
+
+  // Reset if out
+  if (ball.x < 0 || ball.x > canvas.width) {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+  }
+}
+
+// Draw everything
+function draw() {
+  drawRect(0, 0, canvas.width, canvas.height);
+  drawRect(player.x, player.y, paddleWidth, paddleHeight);
+  drawRect(computer.x, computer.y, paddleWidth, paddleHeight);
+  drawBall(ball.x, ball.y, ball.radius);
+}
+
+// Game loop
+function gameLoop() {
+  update();
+  draw();
+}
+
+setInterval(gameLoop, 1000 / 60);
+
+// Controls
+document.addEventListener("keydown", function(e) {
+  if (e.key === "ArrowUp") player.y -= 20;
+  if (e.key === "ArrowDown") player.y += 20;
+});
+</script>
+
+</body>
+</html>
